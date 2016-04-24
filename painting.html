@@ -60,12 +60,14 @@
 
     // Tilemap Drawing Area
     var tilemap = null;
+    var tilemap2 = null;
     var tilelayer = null;
     var gridsize = 32;
     var tilewidth = 8;
     var tileheight = 8;
 
-
+    // Turn Button
+    var turnbutton;
 
     //  Sprite Preview
     var preview;
@@ -92,11 +94,11 @@
 
         data = [];
 
-        for (var y = 0; y < spriteHeight; y++)
+        for (var y = 0; y < tileheight; y++)
         {
             var a = [];
 
-            for (var x = 0; x < spriteWidth; x++)
+            for (var x = 0; x < tilewidth; x++)
             {
                 a.push('.');
             }
@@ -619,7 +621,55 @@
 
     }
 
+    function tileLookup(x, y, layer) {
+        if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight) {
+            return -1;
+        }
+        return tilemap.getTile(x, y, layer, true);
+    }
+
+    function propagateSpore(x, y, radius) {
+        var lowerwidth = Math.max(0, x-radius);
+        var upperwidth = Math.min(tilewidth, x+radius+1);
+        var lowerheight = Math.max(0, y-radius);
+        var upperheight = Math.min(tileheight, y+radius+1);
+        console.log(lowerwidth);
+        console.log(upperwidth);
+        console.log(lowerheight);
+        console.log(upperheight);
+        for (var y = lowerheight; y < upperheight; y++)
+        {
+            for (var x = lowerwidth; x < upperwidth; x++)
+            {
+                var result = tilemap.getTile(x, y, tilelayer2, true);
+                if (result !== 40) {
+                    tilemap.putTile(40, x, y, tilelayer2);
+                }
+            }
+        }
+    }
+
+    function propagateSpores() {
+        /* Scan for spores. */
+        for (var y = 0; y < data.length; y++)
+        {
+            for (var x = 0; x < data[y].length; x++)
+            {
+                var v = data[y][x];
+                if (v == 'S') {
+                    propagateSpore(x, y, 1);
+                }
+            }
+        }
+        
+    }
+
+    function buttonPress() {
+        propagateSpores();
+    }
+
     function preload() {
+        game.load.spritesheet('button', 'assets/button-round.png', 64, 64);
         game.load.tilemap('map', 'assets/desert.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tiles', 'assets/desert.png');
     }
@@ -643,18 +693,28 @@
         tilelayer2.x = 50;
         tilelayer2.y = 330;
 
+        turnbutton = game.add.button(500, 500, 'button', buttonPress, this);
+
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
 
         game.stage.backgroundColor = '#505050';
-
+        
+        
+        /*
+        turnbutton.fixedToCamera = false;
+        turnbutton.x = 50;
+        turnbutton.y = 30;
+        */
         createUI();
         createDrawingArea();
         createPreview();
         createEventListeners();
-
+        
         resetData();
         setColor(0);
+        
+        /*turnbutton.bringToTop(); */
 
     }
 
@@ -800,13 +860,15 @@
             isDown = false;
             return;
         }
-        
+
         else
         {
             if (colorIndex == 0) {
+                data[y][x] = 'G';
                 tilemap.putTile(40, x, y, tilelayer2);
             }
             if (colorIndex == 1) {
+                data[y][x] = 'S';
                 tilemap.putTile(48, x, y, tilelayer2);
             }
             isDown = false;
