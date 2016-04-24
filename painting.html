@@ -638,8 +638,10 @@
         tilelayer.x = 50;
         tilelayer.y = 330;
 
-        console.log("tilelayer's height: " + tilelayer.height);
-        console.log("tilelayer's width: " + tilelayer.width);
+        tilelayer2 = tilemap.createBlankLayer('Tile Layer 2', 8, 8, 32, 32);
+        tilelayer2.fixedToCamera = false;
+        tilelayer2.x = 50;
+        tilelayer2.y = 330;
 
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
@@ -794,12 +796,14 @@
 
         if (isErase)
         {
+            tilemap.removeTile(x, y, tilelayer2);
+            isDown = false;
             return;
 
         }
         else
         {
-            tilemap.putTile(colorIndex, x, y, tilelayer);
+            tilemap.putTile(colorIndex, x, y, tilelayer2);
             isDown = false;
         }
 
