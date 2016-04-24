@@ -620,8 +620,8 @@
     }
 
     function preload() {
-        game.load.tilemap('map', 'assets/maze4.json', null, Phaser.Tilemap.TILED_JSON);
-        game.load.image('tiles', 'assets/tiles.png');
+        game.load.tilemap('map', 'assets/desert.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.image('tiles', 'assets/desert.png');
     }
 
     function create() {
@@ -799,11 +799,16 @@
             tilemap.removeTile(x, y, tilelayer2);
             isDown = false;
             return;
-
         }
+        
         else
         {
-            tilemap.putTile(colorIndex, x, y, tilelayer2);
+            if (colorIndex == 0) {
+                tilemap.putTile(40, x, y, tilelayer2);
+            }
+            if (colorIndex == 1) {
+                tilemap.putTile(48, x, y, tilelayer2);
+            }
             isDown = false;
         }
 
