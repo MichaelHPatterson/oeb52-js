@@ -72,7 +72,7 @@
     var ci = 0;
     var color = 0;
     var palette = 0;
-    var pmap = [0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F'];
+    var pmap = [0,1];
 
     //  Data
     var frame = 1;
@@ -370,21 +370,7 @@
                 'nextFrame': Phaser.Keyboard.PERIOD,
                 'prevFrame': Phaser.Keyboard.COMMA,
                 'color0': Phaser.Keyboard.ZERO,
-                'color1': Phaser.Keyboard.ONE,
-                'color2': Phaser.Keyboard.TWO,
-                'color3': Phaser.Keyboard.THREE,
-                'color4': Phaser.Keyboard.FOUR,
-                'color5': Phaser.Keyboard.FIVE,
-                'color6': Phaser.Keyboard.SIX,
-                'color7': Phaser.Keyboard.SEVEN,
-                'color8': Phaser.Keyboard.EIGHT,
-                'color9': Phaser.Keyboard.NINE,
-                'color10': Phaser.Keyboard.A,
-                'color11': Phaser.Keyboard.B,
-                'color12': Phaser.Keyboard.C,
-                'color13': Phaser.Keyboard.D,
-                'color14': Phaser.Keyboard.E,
-                'color15': Phaser.Keyboard.F
+                'color1': Phaser.Keyboard.ONE
             }
         );
 
@@ -398,7 +384,7 @@
         keys.nextFrame.onDown.add(nextFrame, this);
         keys.prevFrame.onDown.add(prevFrame, this);
 
-        for (var i = 0; i < 16; i++)
+        for (var i = 0; i < 2; i++)
         {
             keys['color' + i].onDown.add(setColor, this, 0, i);
         }
@@ -467,14 +453,19 @@
         ui.clear(0, 0, 32 * 16, 32);
 
         var x = 0;
+        var clr_counter = 0;
 
         for (var clr in game.create.palettes[palette])
         {
             ui.rect(x, 0, 32, 32, game.create.palettes[palette][clr]);
             x += 32;
+            clr_counter++;
+            if (clr_counter == 2) {
+              break;
+            }
         }
 
-        ui.copy('uiGrid');
+        /* ui.copy('uiGrid'); */
 
     }
 
@@ -502,9 +493,9 @@
 
         if (i < 0)
         {
-            i = 15;
+            i = 1;
         }
-        else if (i >= 16)
+        else if (i >= 2)
         {
             i = 0;
         }
