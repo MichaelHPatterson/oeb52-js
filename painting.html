@@ -3,7 +3,6 @@
 <head>
     <title>Phaser Example Runner</title>
     <meta charset="utf-8">
-    <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
     <meta name="viewport" content="initial-scale=1 maximum-scale=1 user-scalable=0 minimal-ui">
     <script src="_site/js/jquery-2.0.3.min.js" type="text/javascript"></script>
     <script src="_site/phaser/phaser.2.4.6.min.js" type="text/javascript"></script>
@@ -25,7 +24,7 @@
     var IDE_HOOK = false;
     var VERSION = '2.4.6';
 
-    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { create: create });
+    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create });
 
     //  Dimensions
     var previewSize = 6;
@@ -58,6 +57,15 @@
     var canvasGrid;
     var canvasSprite;
     var canvasZoom = 32;
+
+    // Tilemap Drawing Area
+    var tilemap = null;
+    var tilelayer = null;
+    var gridsize = 32;
+    var tilewidth = 8;
+    var tileheight = 8;
+
+
 
     //  Sprite Preview
     var preview;
@@ -611,10 +619,27 @@
 
     }
 
+    function preload() {
+        game.load.tilemap('map', 'assets/maze4.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.image('tiles', 'assets/tiles.png');
+    }
+
     function create() {
 
         //   So we can right-click to erase
         document.body.oncontextmenu = function() { return false; };
+
+
+        tilemap = game.add.tilemap('map');
+        tilemap.addTilesetImage('tiles', 'tiles');
+
+        tilelayer = tilemap.createLayer('Tile Layer 1');
+        tilelayer.fixedToCamera = false;
+        tilelayer.x = 50;
+        tilelayer.y = 330;
+
+        console.log("tilelayer's height: " + tilelayer.height);
+        console.log("tilelayer's width: " + tilelayer.width);
 
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
@@ -627,7 +652,7 @@
         createEventListeners();
 
         resetData();
-        setColor(2);
+        setColor(0);
 
     }
 
@@ -751,12 +776,11 @@
     }
 
     function paint(pointer) {
-
         //  Get the grid loc from the pointer
-        var x = game.math.snapToFloor(pointer.x - canvasSprite.x, canvasZoom) / canvasZoom;
-        var y = game.math.snapToFloor(pointer.y - canvasSprite.y, canvasZoom) / canvasZoom;
+        var x = game.math.snapToFloor(pointer.x - tilelayer.x, gridsize) / gridsize;
+        var y = game.math.snapToFloor(pointer.y - tilelayer.y, gridsize) / gridsize;
 
-        if (x < 0 || x >= spriteWidth || y < 0 || y >= spriteHeight)
+        if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight)
         {
             return;
         }
@@ -770,15 +794,13 @@
 
         if (isErase)
         {
-            data[y][x] = '.';
-            canvas.clear(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
-            preview.clear(x * previewSize, y * previewSize, previewSize, previewSize, color);
+            return;
+
         }
         else
         {
-            data[y][x] = pmap[colorIndex];
-            canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
-            preview.rect(x * previewSize, y * previewSize, previewSize, previewSize, color);
+            tilemap.putTile(colorIndex, x, y, tilelayer);
+            isDown = false;
         }
 
     }
