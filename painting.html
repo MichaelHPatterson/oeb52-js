@@ -36,6 +36,9 @@
     var sdeathText;
     var sdeathUp;
     var sdeathDown;
+    var zygoteText;
+    var zygoteUp;
+    var zygoteDown;
     var rangeText;
     var rangeUp;
     var rangeDown;
@@ -66,6 +69,7 @@
     // User-writeable constants
     var gdeathprob = 50;
     var sdeathprob = 50;
+    var zygoteprob = 5;
 
     var sporerange = 5;
     var averagespores = 3;
@@ -252,11 +256,27 @@
         sdeathDown.input.useHandCursor = true;
         sdeathDown.events.onInputDown.add(decreaseProbability, this);
 
+        // Change Gametophyte Fertilization Probability
+
+        zygoteText = game.add.text(rightCol, 180, "Gametophyte Fertilization \nProbability (per pair): " + 
+            zygoteprob + "%", style);
+        zygoteUp = game.add.sprite(rightCol + 180, 180, 'plus');
+        zygoteUp.name = 'zygoteProbability';
+        zygoteUp.inputEnabled = true;
+        zygoteUp.input.useHandCursor = true;
+        zygoteUp.events.onInputDown.add(increaseProbability, this);
+
+        zygoteDown = game.add.sprite(rightCol + 220, 180, 'minus');
+        zygoteDown.name = 'zygoteProbability';
+        zygoteDown.inputEnabled = true;
+        zygoteDown.input.useHandCursor = true;
+        zygoteDown.events.onInputDown.add(decreaseProbability, this);
+
         //  Change Spore Dispersal Range
 
-        rangeText = game.add.text(rightCol, 180, "Spore Dispersal \nRange: " + sporerange + " blocks", style);
+        rangeText = game.add.text(rightCol, 240, "Spore Dispersal \nRange: " + sporerange + " blocks", style);
 
-        rangeUp = game.add.sprite(rightCol + 180, 180, 'plus');
+        rangeUp = game.add.sprite(rightCol + 180, 240, 'plus');
         rangeUp.inputEnabled = true;
         rangeUp.input.useHandCursor = true;
         rangeUp.events.onInputDown.add(function() {
@@ -267,7 +287,7 @@
             rangeText.text = "Spore Dispersal \nRange: " + sporerange + " blocks";
         });
 
-        rangeDown = game.add.sprite(rightCol + 220, 180, 'minus');
+        rangeDown = game.add.sprite(rightCol + 220, 240, 'minus');
         rangeDown.inputEnabled = true;
         rangeDown.input.useHandCursor = true;
         rangeDown.events.onInputDown.add(function() {
@@ -284,9 +304,9 @@
 
         //  Change Average # of spores per sporophyte
 
-        sporeSpawningText = game.add.text(rightCol, 240, "Average # of Spores \nper sporophyte: " + averagespores + " spores", style);
+        sporeSpawningText = game.add.text(rightCol, 300, "Average # of Spores \nper sporophyte: " + averagespores + " spores", style);
 
-        sporeSpawningUp = game.add.sprite(rightCol + 180, 240, 'plus');
+        sporeSpawningUp = game.add.sprite(rightCol + 180, 300, 'plus');
         sporeSpawningUp.inputEnabled = true;
         sporeSpawningUp.input.useHandCursor = true;
         sporeSpawningUp.events.onInputDown.add(function() {
@@ -305,7 +325,7 @@
             sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
         });
 
-        sporeSpawningDown = game.add.sprite(rightCol + 220, 240, 'minus');
+        sporeSpawningDown = game.add.sprite(rightCol + 220, 300, 'minus');
         sporeSpawningDown.inputEnabled = true;
         sporeSpawningDown.input.useHandCursor = true;
         sporeSpawningDown.events.onInputDown.add(function() {
@@ -319,7 +339,7 @@
         });
 
         // Epoch Counter
-        epochText = game.add.text(rightCol, 300, "# of Turns: " + epochCounter + " turns", style);
+        epochText = game.add.text(rightCol, 360, "# of Turns: " + epochCounter + " turns", style);
 
         //  Save Icon
 
@@ -406,17 +426,24 @@
                 return;
             }
             gdeathprob += 5;
+            gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
+                "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
         }
         else if (sprite.name === 'sporoProbability') {
             if (sdeathprob == 100) {
                 return;
             }
             sdeathprob += 5;
+            sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
+                "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
         }
-        gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
-            "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
-        sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
-            "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
+        else if (sprite.name === 'zygoteProbability') {
+            if (zygoteprob == 100) {
+                return;
+            }
+            zygoteprob += 5;
+            zygoteText.text = "Gametophyte Fertilization \nProbability (per pair): " + zygoteprob + "%";
+        }
     }
 
     function decreaseProbability(sprite) {
@@ -426,28 +453,24 @@
                 return;
             }
             gdeathprob -= 5;
+            gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
+                "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
         }
         else if (sprite.name === 'sporoProbability') {
             if (sdeathprob == 0) {
                 return;
             }
             sdeathprob -= 5;
+            sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
+                "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
         }
-        gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
-            "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
-        sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
-            "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
-    }
-
-    function increaseRange() {
-        sporerange += 1;
-    }
-
-    function tileLookup(x, y, layer) {
-        if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight) {
-            return -1;
+        else if (sprite.name === 'zygoteProbability') {
+            if (zygoteprob == 0) {
+                return;
+            }
+            zygoteprob -= 5;
+            zygoteText.text = "Gametophyte Fertilization \nProbability (per pair): " + zygoteprob + "%";
         }
-        return tilemap.getTile(x, y, layer, true);
     }
 
     function propagateSpore(x, y, radius) {
@@ -564,7 +587,8 @@
          console.log("G COUNT: " + numGametophytes);
          var numFree = freeTiles.length;
          console.log("F COUNT: " + numFree);
-         if (numGametophytes > 1 && freeTiles.length > 0) {
+         if (numGametophytes > 1 && freeTiles.length > 0 && 
+              ((Math.random() * 100) < ((numGametophytes - 1) * (zygoteprob / 2.0)))) {
             var freeIndex = Math.floor((Math.random() * freeTiles.length));
             var sporox = decodeX(freeTiles[freeIndex]);
             var sporoy = decodeY(freeTiles[freeIndex]);
