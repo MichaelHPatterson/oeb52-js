@@ -71,6 +71,9 @@
     var gdeathprob = 50;
     var sdeathprob = 50;
 
+    var sporerange = 5;
+    var averagespores = 3;
+
     // Turn Button
     var turnbutton;
 
@@ -218,7 +221,8 @@
 
         //  Change width
 
-        gdeathText = game.add.text(rightCol, 60, "Probability of Gametophyte \nDeath: " + gdeathprob + "%", style);
+        gdeathText = game.add.text(rightCol, 60, "Gametophyte Death \nProbability: " + gdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns", style);
 
         widthUp = game.add.sprite(rightCol + 180, 60, 'plus');
         widthUp.name = 'gametoProbability';
@@ -234,15 +238,16 @@
 
         //  Change height
 
-        sdeathText = game.add.text(rightCol, 100, "Probability of Sporophyte \nDeath: " + sdeathprob + "%", style);
+        sdeathText = game.add.text(rightCol, 120, "Sporophyte Death \nProbability: " + sdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns", style);
 
-        heightUp = game.add.sprite(rightCol + 180, 100, 'plus');
+        heightUp = game.add.sprite(rightCol + 180, 120, 'plus');
         heightUp.name = 'sporoProbability';
         heightUp.inputEnabled = true;
         heightUp.input.useHandCursor = true;
         heightUp.events.onInputDown.add(increaseProbability, this);
 
-        heightDown = game.add.sprite(rightCol + 220, 100, 'minus');
+        heightDown = game.add.sprite(rightCol + 220, 120, 'minus');
         heightDown.name = 'sporoProbability';
         heightDown.inputEnabled = true;
         heightDown.input.useHandCursor = true;
@@ -250,31 +255,65 @@
 
         //  Change frame
 
-        frameText = game.add.text(rightCol, 160, "Frame: " + frame + " / " + frames.length, style);
+        rangeText = game.add.text(rightCol, 180, "Spore Dispersal \nRange: " + sporerange + " blocks", style);
 
-        nextFrameButton = game.add.sprite(rightCol + 180, 160, 'plus');
+        nextFrameButton = game.add.sprite(rightCol + 180, 180, 'plus');
         nextFrameButton.inputEnabled = true;
         nextFrameButton.input.useHandCursor = true;
-        /* nextFrameButton.events.onInputDown.add(nextFrame, this); */
+        nextFrameButton.events.onInputDown.add(function() {
+            if (sporerange == tilewidth) {
+                return;
+            }
+            sporerange += 1;
+            rangeText.text = "Spore Dispersal \nRange: " + sporerange + " blocks";
+        });
 
-        prevFrameButton = game.add.sprite(rightCol + 220, 160, 'minus');
+        prevFrameButton = game.add.sprite(rightCol + 220, 180, 'minus');
         prevFrameButton.inputEnabled = true;
         prevFrameButton.input.useHandCursor = true;
-        /* prevFrameButton.events.onInputDown.add(prevFrame, this); */
+        prevFrameButton.events.onInputDown.add(function() {
+            if (sporerange == 1) {
+                return;
+            }
+            sporerange -= 1;
+            rangeText.text = "Spore Dispersal \nRange: " + sporerange + " blocks";
+        });
 
         //  Change preview
 
-        previewSizeText = game.add.text(rightCol, 220, "Size: " + previewSize, style);
+        sporeSpawningText = game.add.text(rightCol, 240, "Average # of Spores \nper sporophyte: " + averagespores + " spores", style);
 
-        previewSizeUp = game.add.sprite(rightCol + 180, 220, 'plus');
+        previewSizeUp = game.add.sprite(rightCol + 180, 240, 'plus');
         previewSizeUp.inputEnabled = true;
         previewSizeUp.input.useHandCursor = true;
-        /* previewSizeUp.events.onInputDown.add(increasePreviewSize, this); */
+        previewSizeUp.events.onInputDown.add(function() {
+            if (averagespores < 5) {
+                if (averagespores + 1 > sporerange * sporerange) {
+                    return;
+                }
+                averagespores += 1;
+            }
+            else {
+                if (averagespores + 5 > sporerange * sporerange) {
+                    return;
+                }
+                averagespores += 5;
+            }
+            sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
+        });
 
-        previewSizeDown = game.add.sprite(rightCol + 220, 220, 'minus');
+        previewSizeDown = game.add.sprite(rightCol + 220, 240, 'minus');
         previewSizeDown.inputEnabled = true;
         previewSizeDown.input.useHandCursor = true;
-        /* previewSizeDown.events.onInputDown.add(decreasePreviewSize, this); */
+        previewSizeDown.events.onInputDown.add(function() {
+            if (averagespores < 5 && averagespores > 0) {
+                averagespores -= 1;
+            }
+            else if (averagespores > 0) {
+                averagespores -= 5;
+            }
+            sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
+        });
 
         //  Save Icon
 
@@ -391,8 +430,10 @@
             }
             sdeathprob += 5;
         }
-        gdeathText.text = "Probability of Gametophyte \nDeath: " + gdeathprob + "%";
-        sdeathText.text = "Probability of Sporophyte \nDeath: " + sdeathprob + "%";
+        gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
+        sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
     }
 
     function decreaseProbability(sprite) {
@@ -409,10 +450,15 @@
             }
             sdeathprob -= 5;
         }
-        gdeathText.text = "Probability of Gametophyte \nDeath: " + gdeathprob + "%";
-        sdeathText.text = "Probability of Sporophyte \nDeath: " + sdeathprob + "%";
+        gdeathText.text = "Gametophyte Death \nProbability: " + gdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns";
+        sdeathText.text = "Sporophyte Death \nProbability: " + sdeathprob + 
+            "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns";
     }
 
+    function increaseRange() {
+        sporerange += 1;
+    }
 
     function tileLookup(x, y, layer) {
         if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight) {
@@ -441,8 +487,9 @@
                 }
                 var result1 = tilemap.getTile(xx, yy, tilelayer1, true).index;
                 var result2 = tilemap.getTile(xx, yy, tilelayer2, true).index;
+                var dispersalProbability = (averagespores / ((sporerange * sporerange) - 1));
                 if (result2 !== 48 && result2 !== 40 && result1 !== 34 
-                    && Math.random() < .015) {
+                    && Math.random() < dispersalProbability) {
                     tilemap.putTile(48, xx, yy, tilelayer2);
                 }
             }
@@ -458,7 +505,7 @@
             {
                 var v = data[y][x];
                 if (v == 'S') {
-                    propagateSpore(x, y, 3);
+                    propagateSpore(x, y, sporerange);
                 }
             }
         }
