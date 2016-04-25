@@ -61,7 +61,8 @@
     // Tilemap Drawing Area
     var tilemap = null;
     var tilemap2 = null;
-    var tilelayer = null;
+    var tilelayer1 = null;
+    var tilelayer2 = null;
     var gridsize = 32;
     var tilewidth = 8;
     var tileheight = 8;
@@ -633,21 +634,25 @@
         var upperwidth = Math.min(tilewidth, x+radius+1);
         var lowerheight = Math.max(0, y-radius);
         var upperheight = Math.min(tileheight, y+radius+1);
-        console.log(lowerwidth);
-        console.log(upperwidth);
-        console.log(lowerheight);
-        console.log(upperheight);
-        for (var y = lowerheight; y < upperheight; y++)
+
+        for (var yy = lowerheight; yy < upperheight; yy++)
         {
-            for (var x = lowerwidth; x < upperwidth; x++)
+            for (var xx = lowerwidth; xx < upperwidth; xx++)
             {
-                var result = tilemap.getTile(x, y, tilelayer2, true);
-                if (result !== 40) {
-                    tilemap.putTile(40, x, y, tilelayer2);
+                if (xx == x && yy == y) {
+                    if (Math.random() < .5) {
+                        tilemap.putTile(39, x, y, tilelayer2);
+                    }
+                    continue;
+                }
+                var result = tilemap.getTile(xx, yy, tilelayer2, true).index;
+                if (result !== 48 && result !== 40 && Math.random() < .05) {
+                    tilemap.putTile(48, xx, yy, tilelayer2);
                 }
             }
         }
     }
+
 
     function propagateSpores() {
         /* Scan for spores. */
@@ -657,15 +662,179 @@
             {
                 var v = data[y][x];
                 if (v == 'S') {
-                    propagateSpore(x, y, 1);
+                    propagateSpore(x, y, 6);
                 }
             }
         }
         
     }
 
+    /* This logic will break if we go over a 99x99-sized grid. */
+    function encodeTuple(x, y) {
+        return ((x * 100) + y);
+    }
+
+    function decodeX(tuple) {
+        return (Math.floor(tuple/100));
+    }
+
+    function decodeY(tuple) {
+        return (tuple - (decodeX(tuple)*100));
+    }
+
+    var waterTiles = [];
+    var gametophyteTiles = [];
+    var freeTiles = [];
+
+    /* 
+     * This function is first called with the (x,y) of the gametophyte 
+     * releasing its gametes. It checks how many other gametes are connected 
+     * via adjacency to a series of contiguous water tiles. That number then
+     * determines the probability of a zygote forming to create a sporophyte,
+     * which will spawn somewhere on a free tile adj. to the contiguous body
+     * of water.
+     */
+    function propagateGamete(x, y, radius, careAboutRadius) {
+        var lowerwidth = Math.max(0, x-1);
+        var upperwidth = Math.min(tilewidth, x+2);
+        var lowerheight = Math.max(0, y-1);
+        var upperheight = Math.min(tileheight, y+2);
+        
+        /* Add ourselves now. */
+        gametophyteTiles.push(encodeTuple(x, y));
+
+        /* Scan for water tiles. */
+        for (var yy = lowerheight; yy < upperheight; yy++)
+        {
+            for (var xx = lowerwidth; xx < upperwidth; xx++)
+            {
+                if (xx == x && yy == y) {
+                    if (Math.random() < .5) {
+                        tilemap.putTile(47, x, y, tilelayer2);
+                    }
+                    continue;
+                }
+                var result = tilemap.getTile(xx, yy, tilelayer1, true).index;
+                /* We've found water that we haven't looked in already */
+                if (result === 34 && (waterTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
+                    waterTiles.push(encodeTuple(xx,yy));
+                    gameteSonar(xx, yy, radius, careAboutRadius);
+                }
+            }
+        }
+
+        /* 
+         * Scan complete. We can now decide whether a sporophyte is being
+         * produced, and if so where it will go. For now, randomly select
+         * a slot in the freeTiles array if any other gametophyte was]
+         * detected.
+         */
+         var numWaterTiles = waterTiles.length;
+         console.log("W COUNT: " + numWaterTiles);
+         var numGametophytes = gametophyteTiles.length;
+         console.log("G COUNT: " + numGametophytes);
+         var numFree = freeTiles.length;
+         console.log("F COUNT: " + numFree);
+         if (numGametophytes > 1 && freeTiles.length > 0) {
+            var freeIndex = Math.floor((Math.random() * freeTiles.length));
+            var sporox = decodeX(freeTiles[freeIndex]);
+            var sporoy = decodeY(freeTiles[freeIndex]);
+            tilemap.putTile(40, sporox, sporoy, tilelayer2);
+         }
+         waterTiles = [];
+         gametophyteTiles = [];
+         freeTiles = [];
+    }
+
+    /*
+     * This function takes in a water tile that has already been added to the
+     * list of water tiles, and is recursively called on adjacent water tiles. 
+     * Populates the lists of water tiles, gametophyte tiles, and free tiles.
+     */
+    function gameteSonar(x, y, radius, careAboutRadius) {
+        console.log("PERFORMING SONAR ON X :" + x + "AND Y: " + y);
+        if (careAboutRadius && radius == 0) {
+            return;
+        }
+        var lowerwidth = Math.max(0, x-1);
+        var upperwidth = Math.min(tilewidth, x+2);
+        var lowerheight = Math.max(0, y-1);
+        var upperheight = Math.min(tileheight, y+2);
+
+        /* Scan for water and gametophytes. */
+        for (var yy = lowerheight; yy < upperheight; yy++)
+        {
+            for (var xx = lowerwidth; xx < upperwidth; xx++)
+            {   
+                var result1 = tilemap.getTile(xx, yy, tilelayer1, true).index;
+                var result2 = tilemap.getTile(xx, yy, tilelayer2, true).index;               
+                /* We've found water that we haven't looked in already */
+                if (result1 === 34 && (waterTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
+                    waterTiles.push(encodeTuple(xx,yy));
+                    gameteSonar(xx, yy, radius-1, careAboutRadius);
+                    continue;
+                }
+
+                /* We've found a gametophyte we haven't counted already. */
+                if (result2 === 48 && (gametophyteTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
+                    gametophyteTiles.push(encodeTuple(xx,yy));
+                    continue;
+                }
+
+                /* 
+                 * If we get here and the tile is not water, a gametophyte, or a sporophyte,
+                 * then mark it as a candidate tile for the gametophyte.
+                 */
+                if ((result1 !== 34) && (result2 !== 40) && (result2 !== 48) &&
+                     (freeTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
+                    freeTiles.push(encodeTuple(xx,yy));
+                }
+            }
+        }
+    }
+
+    function propagateGametes() {
+        /* Scan for gametes. */
+        for (var y = 0; y < data.length; y++)
+        {
+            for (var x = 0; x < data[y].length; x++)
+            {
+                var v = data[y][x];
+                if (v == 'G') {
+                    propagateGamete(x, y, 0, false);
+                }
+            }
+        }
+    }
+
+    function updateData() {
+        /* Scan for gametophytes and sporophytes. */
+        for (var y = 0; y < data.length; y++)
+        {
+            for (var x = 0; x < data[y].length; x++)
+            {
+                var result = tilemap.getTile(x, y, tilelayer2, true).index;
+                if (result === 48) {
+                    data[y][x] = 'G';
+                }
+                if (result === 40) {
+                    data[y][x] = 'S';
+                }
+            }
+        }
+    }
+
+
     function buttonPress() {
+        /* Gametes arbitrarily get priority over spores. */
+        propagateGametes();
         propagateSpores();
+
+        /* Update data to reflect new members. This is done after the fact
+         * to avoid the added bookkeeping of which Gs/Ss have been propagated
+         * already.
+         */
+         updateData();
     }
 
     function preload() {
@@ -683,10 +852,10 @@
         tilemap = game.add.tilemap('map');
         tilemap.addTilesetImage('tiles', 'tiles');
 
-        tilelayer = tilemap.createLayer('Tile Layer 1');
-        tilelayer.fixedToCamera = false;
-        tilelayer.x = 50;
-        tilelayer.y = 330;
+        tilelayer1 = tilemap.createLayer('Tile Layer 1');
+        tilelayer1.fixedToCamera = false;
+        tilelayer1.x = 50;
+        tilelayer1.y = 330;
 
         tilelayer2 = tilemap.createBlankLayer('Tile Layer 2', 8, 8, 32, 32);
         tilelayer2.fixedToCamera = false;
@@ -839,8 +1008,8 @@
 
     function paint(pointer) {
         //  Get the grid loc from the pointer
-        var x = game.math.snapToFloor(pointer.x - tilelayer.x, gridsize) / gridsize;
-        var y = game.math.snapToFloor(pointer.y - tilelayer.y, gridsize) / gridsize;
+        var x = game.math.snapToFloor(pointer.x - tilelayer1.x, gridsize) / gridsize;
+        var y = game.math.snapToFloor(pointer.y - tilelayer1.y, gridsize) / gridsize;
 
         if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight)
         {
@@ -865,11 +1034,11 @@
         {
             if (colorIndex == 0) {
                 data[y][x] = 'G';
-                tilemap.putTile(40, x, y, tilelayer2);
+                tilemap.putTile(48, x, y, tilelayer2);
             }
             if (colorIndex == 1) {
                 data[y][x] = 'S';
-                tilemap.putTile(48, x, y, tilelayer2);
+                tilemap.putTile(40, x, y, tilelayer2);
             }
             isDown = false;
         }
