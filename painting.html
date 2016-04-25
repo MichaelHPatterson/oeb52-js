@@ -67,22 +67,18 @@
     var tileheight = 16;
 
     // User-writeable constants
-    var gdeathprob = 50;
-    var sdeathprob = 50;
-    var zygoteprob = 5;
+    var gdeathprob;
+    var sdeathprob;
+    var zygoteprob;
 
-    var sporerange = 5;
-    var averagespores = 3;
-    var epochCounter = 0;
+    var sporerange;
+    var averagespores;
+    var epochCounter;
 
     var runningTheProgram = false;
 
     // Turn Button
     var turnbutton;
-
-    //  Sprite Preview
-    var preview;
-    var previewBG;
 
     //  Keys + Mouse
     var keys;
@@ -90,17 +86,23 @@
     var isErase = false;
 
     //  Palette
-    var ci = 0;
     var color = 0;
     var palette = 0;
-    var pmap = [0,1];
+    var pmap = ['G','S'];
 
     //  Data
-    var frame = 1;
-    var frames = [[]];
-
     var data;
 
+    var paragraphCounter = 0;
+    var paragraphsArray = [
+        "Plants have undergone countless\nfascinating evolutionary patterns, but\nnone might be as important to the \ndiversification of land plants as the \nrise to dominance of the sporophyte.",
+        "A central cause of sporophyte dominance\nwas evolutionary pressures on the\nalternation of generations, especially\nenvironmental factors.",
+        "The goal of this simulation is to model\nthose environmental factors.",
+        "The 16x16 grid of tiles to the left\nrepresents our simple environment.\nThere are two ground tile types: land\nand water. There are two plant tile\ntypes: gametophytes and sporophytes.",
+        "Two adjacent gametophytes may transfer\ngametes and produce a sporophyte. The\nonly way gamete transfer can happen\nover longer distances is aquatically,\nbehavior which is also included in\nthe model.",
+        "Sporophytes produce spores, which provide a more long-distance\n means of propagation independent\nof water. These spores develop into\ngametophytes where they land.",
+        "When plants first began to move onto land, they still relied heavily on\n water sources, including for gamete transfer. The first sporophytes,\n which remained attached to their gametophytes, rose just out of the\n boundary layer and dispersed spores in a relatively localized area.",
+        "Efforts to move inland required adaptations to the relative scarcity\n of water. Fertilization events would become relatively rare due to\n reliance on transient water sources like rain puddles for gamete\n transfer.", "Spore dispersal, however, would remain unaffected by the scarcity\n of water, which meant that spores would become an even more\n important means of plant propagation away from water.", "As the sporophyte becomes more prominent, child gametophytes are\n spread longer distances away. More spores are also produced as a\n means of compensation for the relative rarity of fertilization\n events. The sporophyte now lives longer and is no longer\n transient.", "The final main evolutionary development of the alternation\n of generations was the development of seed plants. Seed plants\n represent total dominance of the sporophyte over the gametophyte\n, as the female gametophyte is completely encapsulated within the\n parent sporophyte, and the male gametophyte is reduced to pollen.\n The production of seeds allows for seed dispersal, essentially\n the dispersal of new sporophytes. This is the final step shown\n in the environment and the culmination of sporophyte dominance."];
     function resetData() {
 
         data = [];
@@ -118,6 +120,41 @@
         }
 
     }
+
+    var simdata1 =[[30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], 
+                 [34, 34, 34, 30, 30, 30, 30, 34, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [34, 30, 30, 30, 30, 34, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 34, 'G',  'G',  'G',  'G', 30, 30, 30, 30, 30, 'S', 'S', 'S', 30, 30],
+                 [30, 30, 'G',  30, 30, 30, 30, 30, 30, 30, 30, 'S', 30, 30, 30, 30],
+                 [30, 30, 'G',  30, 30, 30, 30, 30, 30, 30, 30, 'S', 30, 30, 30, 30],
+                 [30, 30, 'G',  30, 'G',  'G', 30, 30, 30, 30, 30, 'S', 'S', 'S', 30, 30],
+                 [30, 30, 'G',  30, 30, 'G', 30, 30, 30, 30, 30, 30, 30, 'S', 30, 30],
+                 [30, 30, 'G',  'G',  'G',  'G', 30, 30, 30, 30, 30, 'S', 'S', 'S', 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+
+var simdata2 =[[30, 30, 'G', 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30], 
+                 [34, 34, 34, 'G', 30, 30, 30, 34, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [34, 'G', 30, 30, 30, 34, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 34, 34, 30, 30, 'G', 'G', 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 34, 34, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 34, 30,  30,  30,  30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30,  30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30,  30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 'G',  'G', 'G',  30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 'G',  'G', 'G', 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 'G',  'G',  'G',  30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                 [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+
 
     function copyToData(src) {
 
@@ -189,23 +226,9 @@
             '2222222'
         ];
 
-        var disk = [
-            'DDDDDDDDDD',
-            'DED1111DED',
-            'DED1111DDD',
-            'DEDDDDDDED',
-            'DEEEEEEEED',
-            'DEFFFFFFED',
-            'DEFF222FED',
-            'DEFF222FED',
-            'DEFF222FED',
-            'DDDDDDDDDD'
-        ];
-
         game.create.texture('arrow', arrow, 2);
         game.create.texture('plus', plus, 3);
         game.create.texture('minus', minus, 3);
-        game.create.texture('save', disk, 4);
 
         ui = game.make.bitmapData(800, 32);
 
@@ -217,8 +240,8 @@
 
         coords = game.add.text(rightCol, 8, "X: 0\tY: 0", style);
 
-        game.add.text(12, 9, pmap.join("\t"), { font: "14px Courier", fill: "#000", tabs: 32 });
-        game.add.text(11, 8, pmap.join("\t"), { font: "14px Courier", fill: "#ffff00", tabs: 32 });
+        game.add.text(12, 9, pmap.join("\t") + "\t\tSELECT ORGANISM: G = GAMETOPHYTE\tS = SPOROPHYTE\n \t\t \tUSE KEYBOARD OR SELECT TO LEFT", { font: "14px Courier", fill: "#000", tabs: 32 });
+        game.add.text(11, 8, pmap.join("\t") + "\t\tSELECT ORGANISM: G = GAMETOPHYTE\tS = SPOROPHYTE\n \t\t \tUSE KEYBOARD OR SELECT TO LEFT", { font: "14px Courier", fill: "#ffff00", tabs: 32 });
 
         paletteArrow = game.add.sprite(8, 36, 'arrow');
 
@@ -341,29 +364,19 @@
         // Epoch Counter
         epochText = game.add.text(rightCol, 360, "# of Turns: " + epochCounter + " turns", style);
 
-        //  Save Icon
+        // Textplanation
 
-        saveText = game.add.text(rightCol, 520, "Saved to console.log", style);
-        saveText.alpha = 0;
-
-        saveIcon = game.add.sprite(750, 550, 'save');
-        saveIcon.inputEnabled = true;
-        saveIcon.input.useHandCursor = true;
-        saveIcon.events.onInputDown.add(save, this);
-
+        saveText = game.add.text(rightCol-5, 400, "Click `Next` Below for Walkthrough", style);
     }
 
     function createEventListeners() {
 
         keys = game.input.keyboard.addKeys(
             {
-                'save': Phaser.Keyboard.S,
-                'color0': Phaser.Keyboard.ZERO,
-                'color1': Phaser.Keyboard.ONE
+                'color0': Phaser.Keyboard.G,
+                'color1': Phaser.Keyboard.S
             }
         );
-
-        keys.save.onDown.add(save, this);
 
         for (var i = 0; i < 2; i++)
         {
@@ -683,6 +696,53 @@
         }
     }
 
+    function removeAllTiles() {
+        for (var y = 0; y < tileheight; y++) {
+            for (var x = 0; x < tilewidth; x++) {
+                tilemap.removeTile(x, y, tilelayer2);
+            }
+        }
+    }
+
+    function setupSimulation(setupData, epochs) {
+        epochCounter = 0;
+        resetData();
+        removeAllTiles();
+        setColor(0);
+        epochText.text = "# of Turns: " + epochCounter + " turns";
+
+        for (var y = 0; y < setupData.length; y++)
+        {
+            for (var x = 0; x < setupData[y].length; x++)
+            {
+                if (setupData[y][x] == 'G') {
+                    data[y][x] = 'G';
+                    tilemap.putTile(48, x, y, tilelayer2);
+                }
+                if (setupData[y][x] == 'S') {
+                    data[y][x] = 'S';
+                    tilemap.putTile(40, x, y, tilelayer2);
+                }
+            }
+        }
+        if (epochs > 0) {
+            nepochs(epochs);
+        }
+    }
+
+
+    function resetGlobals() {
+        gdeathprob = 30;
+        sdeathprob = 10;
+        zygoteprob = 5;
+        sporerange = 5;
+        averagespores = 3;
+        epochCounter = 0;
+    }
+
+    var areWeSimulating = false;
+    var epochKill;
+    var runningSimulation;
 
     function epoch() {
         /* Gametes arbitrarily get priority over spores. */
@@ -696,18 +756,77 @@
          updateData();
          epochCounter += 1;
          epochText.text = "# of Turns: " + epochCounter + " turns";
+         if (areWeSimulating && epochCounter > epochKill) {
+            areWeSimulating = false;
+            clearInterval(runningSimulation);
+            resetGlobals();
+         }
+    }
+
+    function nepochs(n) {
+        epochKill = epochCounter + n;
+        areWeSimulating = true;
+        runningSimulation = setInterval(epoch, 1000);
     }
 
     var runningTheTimer;
     function buttonActualPress() {
+        if (areWeSimulating) {
+            return;
+        }
         if (runningTheProgram == false) {
             runningTheProgram = true;
             runningTheTimer = setInterval(epoch, 1000);
+            turnbuttonText.text = "Pause";
         }
         else {
             runningTheProgram = false;
+            turnbuttonText.text = "Run";
             clearInterval(runningTheTimer);
         }
+    }
+
+    function buttonResetPress() {
+        if (runningTheProgram == true) {
+            runningTheProgram = false;
+            turnbuttonText.text = "Run";
+            clearInterval(runningTheTimer);
+        }
+        if (areWeSimulating) {
+            areWeSimulating = false;
+            clearInterval(runningSimulation);
+        }
+        epochCounter = 0;
+        resetData();
+        removeAllTiles();
+        setColor(0);
+        epochText.text = "# of Turns: " + epochCounter + " turns";
+    }
+
+    function buttonParagraphPress() {
+        /* End the running of the program. */
+        if (runningTheProgram == true) {
+            runningTheProgram = false;
+            turnbuttonText.text = "Run";
+            clearInterval(runningTheTimer);
+        }
+        /* Let the simulation finish */
+        if (areWeSimulating == true) {
+            return;
+        }
+        if (paragraphCounter == 0) {
+            paragraphButtonText.text = "Next";
+        }
+        if (paragraphCounter == 3) {
+            setupSimulation(simdata1, 0);
+        }
+        if (paragraphCounter == 4) {
+            averagespores = 0;
+            gdeathprob = 0;
+            setupSimulation(simdata2, 2);
+        }
+        saveText.text = paragraphsArray[paragraphCounter];
+        paragraphCounter++;
     }
 
     function preload() {
@@ -735,13 +854,22 @@
         tilelayer2.x = 15;
         tilelayer2.y = 60;
 
+        var style = { font: "16px Courier", fill: "#fff", tabs: 80 };
+
         turnbutton = game.add.button(550, 520, 'button', buttonActualPress, this);
+        turnbuttonText = game.add.text(562, 542, "Run", style);
+
+        resetButton = game.add.button(635, 520, 'button', buttonResetPress, this);
+        resetButtonText = game.add.text(645, 542, "Reset", style);
+
+        paragraphButton = game.add.button(720, 520, 'button', buttonParagraphPress, this);
+        paragraphButtonText = game.add.text(730, 542, "Next", style);
 
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
 
         game.stage.backgroundColor = '#505050';
-        
+        resetGlobals();
         createUI();
         createEventListeners();
         
@@ -749,52 +877,9 @@
         setColor(0);
     }
 
-    function save() {
-
-        //  Save current frame
-        frames[frame - 1] = cloneData();
-
-        var output = "";
-
-        for (var f = 0; f < frames.length; f++)
-        {
-            var src = frames[f];
-
-            if (src === null)
-            {
-                continue;
-            }
-
-            output = output.concat("var frame" + f + " = [\n");
-
-            for (var y = 0; y < src.length; y++)
-            {
-                output = output.concat("\t'");
-                output = output.concat(src[y].join(''));
-
-                if (y < src.length - 1)
-                {
-                    output = output.concat("',\n");
-                }
-                else
-                {
-                    output = output.concat("'\n");
-                }
-            }
-            
-            output = output.concat("];\n");
-        }
-
-        console.log(output);
-
-        saveText.alpha = 1;
-        game.add.tween(saveText).to( { alpha: 0 }, 2000, "Linear", true);
-
-    }
-
     function onDown(pointer) {
 
-        if (pointer.y <= 32)
+        if (pointer.y <= 32 && pointer.x <= 64)
         {
             setColor(game.math.snapToFloor(pointer.x, 32) / 32);
         }
