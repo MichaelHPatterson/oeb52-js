@@ -26,27 +26,23 @@
 
     var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create });
 
-    //  Dimensions
-    var previewSize = 6;
-    var spriteWidth = 8;
-    var spriteHeight = 8;
-
     //  UI
     var ui;
     var paletteArrow;
     var coords;
-    var widthText;
-    var widthUp;
-    var widthDown;
-    var heightText;
-    var heightUp;
-    var heightDown;
-    var previewSizeUp;
-    var previewSizeDown;
-    var previewSizeText;
-    var nextFrameButton;
-    var prevFrameButton;
-    var frameText;
+    var gdeathText;
+    var gdeathUp;
+    var gdeathDown;
+    var sdeathText;
+    var sdeathUp;
+    var sdeathDown;
+    var rangeText;
+    var rangeUp;
+    var rangeDown;
+    var sporeSpawningText;
+    var sporeSpawningUp;
+    var sporeSpawningDown;
+
     var saveIcon;
     var saveText;
     var rightCol = 532;
@@ -222,48 +218,48 @@
 
         paletteArrow = game.add.sprite(8, 36, 'arrow');
 
-        //  Change width
+        //  Change Gametophyte Death Probability
 
         gdeathText = game.add.text(rightCol, 60, "Gametophyte Death \nProbability: " + gdeathprob + 
             "%\nAverage Lifespan: " + Math.round(((100 - gdeathprob)/gdeathprob) + 1) + " turns", style);
 
-        widthUp = game.add.sprite(rightCol + 180, 60, 'plus');
-        widthUp.name = 'gametoProbability';
-        widthUp.inputEnabled = true;
-        widthUp.input.useHandCursor = true;
-        widthUp.events.onInputDown.add(increaseProbability, this);
+        gdeathUp = game.add.sprite(rightCol + 180, 60, 'plus');
+        gdeathUp.name = 'gametoProbability';
+        gdeathUp.inputEnabled = true;
+        gdeathUp.input.useHandCursor = true;
+        gdeathUp.events.onInputDown.add(increaseProbability, this);
 
-        widthDown = game.add.sprite(rightCol + 220, 60, 'minus');
-        widthDown.name = 'gametoProbability';
-        widthDown.inputEnabled = true;
-        widthDown.input.useHandCursor = true;
-        widthDown.events.onInputDown.add(decreaseProbability, this);
+        gdeathDown = game.add.sprite(rightCol + 220, 60, 'minus');
+        gdeathDown.name = 'gametoProbability';
+        gdeathDown.inputEnabled = true;
+        gdeathDown.input.useHandCursor = true;
+        gdeathDown.events.onInputDown.add(decreaseProbability, this);
 
-        //  Change height
+        //  Change Sporophyte Death Probability
 
         sdeathText = game.add.text(rightCol, 120, "Sporophyte Death \nProbability: " + sdeathprob + 
             "%\nAverage Lifespan: " + Math.round(((100 - sdeathprob)/sdeathprob) + 1) + " turns", style);
 
-        heightUp = game.add.sprite(rightCol + 180, 120, 'plus');
-        heightUp.name = 'sporoProbability';
-        heightUp.inputEnabled = true;
-        heightUp.input.useHandCursor = true;
-        heightUp.events.onInputDown.add(increaseProbability, this);
+        sdeathUp = game.add.sprite(rightCol + 180, 120, 'plus');
+        sdeathUp.name = 'sporoProbability';
+        sdeathUp.inputEnabled = true;
+        sdeathUp.input.useHandCursor = true;
+        sdeathUp.events.onInputDown.add(increaseProbability, this);
 
-        heightDown = game.add.sprite(rightCol + 220, 120, 'minus');
-        heightDown.name = 'sporoProbability';
-        heightDown.inputEnabled = true;
-        heightDown.input.useHandCursor = true;
-        heightDown.events.onInputDown.add(decreaseProbability, this);
+        sdeathDown = game.add.sprite(rightCol + 220, 120, 'minus');
+        sdeathDown.name = 'sporoProbability';
+        sdeathDown.inputEnabled = true;
+        sdeathDown.input.useHandCursor = true;
+        sdeathDown.events.onInputDown.add(decreaseProbability, this);
 
-        //  Change frame
+        //  Change Spore Dispersal Range
 
         rangeText = game.add.text(rightCol, 180, "Spore Dispersal \nRange: " + sporerange + " blocks", style);
 
-        nextFrameButton = game.add.sprite(rightCol + 180, 180, 'plus');
-        nextFrameButton.inputEnabled = true;
-        nextFrameButton.input.useHandCursor = true;
-        nextFrameButton.events.onInputDown.add(function() {
+        rangeUp = game.add.sprite(rightCol + 180, 180, 'plus');
+        rangeUp.inputEnabled = true;
+        rangeUp.input.useHandCursor = true;
+        rangeUp.events.onInputDown.add(function() {
             if (sporerange == tilewidth) {
                 return;
             }
@@ -271,10 +267,10 @@
             rangeText.text = "Spore Dispersal \nRange: " + sporerange + " blocks";
         });
 
-        prevFrameButton = game.add.sprite(rightCol + 220, 180, 'minus');
-        prevFrameButton.inputEnabled = true;
-        prevFrameButton.input.useHandCursor = true;
-        prevFrameButton.events.onInputDown.add(function() {
+        rangeDown = game.add.sprite(rightCol + 220, 180, 'minus');
+        rangeDown.inputEnabled = true;
+        rangeDown.input.useHandCursor = true;
+        rangeDown.events.onInputDown.add(function() {
             if (sporerange == 1) {
                 return;
             }
@@ -286,14 +282,14 @@
             sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
         });
 
-        //  Change preview
+        //  Change Average # of spores per sporophyte
 
         sporeSpawningText = game.add.text(rightCol, 240, "Average # of Spores \nper sporophyte: " + averagespores + " spores", style);
 
-        previewSizeUp = game.add.sprite(rightCol + 180, 240, 'plus');
-        previewSizeUp.inputEnabled = true;
-        previewSizeUp.input.useHandCursor = true;
-        previewSizeUp.events.onInputDown.add(function() {
+        sporeSpawningUp = game.add.sprite(rightCol + 180, 240, 'plus');
+        sporeSpawningUp.inputEnabled = true;
+        sporeSpawningUp.input.useHandCursor = true;
+        sporeSpawningUp.events.onInputDown.add(function() {
             if (averagespores < 5) {
                 if (averagespores + 1 > (((sporerange + sporerange + 1) * (sporerange + sporerange + 1)) - 1)) {
                     return;
@@ -309,10 +305,10 @@
             sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
         });
 
-        previewSizeDown = game.add.sprite(rightCol + 220, 240, 'minus');
-        previewSizeDown.inputEnabled = true;
-        previewSizeDown.input.useHandCursor = true;
-        previewSizeDown.events.onInputDown.add(function() {
+        sporeSpawningDown = game.add.sprite(rightCol + 220, 240, 'minus');
+        sporeSpawningDown.inputEnabled = true;
+        sporeSpawningDown.input.useHandCursor = true;
+        sporeSpawningDown.events.onInputDown.add(function() {
             if (averagespores <= 5 && averagespores > 0) {
                 averagespores -= 1;
             }
@@ -342,20 +338,12 @@
         keys = game.input.keyboard.addKeys(
             {
                 'save': Phaser.Keyboard.S,
-                'up': Phaser.Keyboard.UP,
-                'down': Phaser.Keyboard.DOWN,
-                'left': Phaser.Keyboard.LEFT,
-                'right': Phaser.Keyboard.RIGHT,
                 'color0': Phaser.Keyboard.ZERO,
                 'color1': Phaser.Keyboard.ONE
             }
         );
 
         keys.save.onDown.add(save, this);
-        keys.up.onDown.add(shiftUp, this);
-        keys.down.onDown.add(shiftDown, this);
-        keys.left.onDown.add(shiftLeft, this);
-        keys.right.onDown.add(shiftRight, this);
 
         for (var i = 0; i < 2; i++)
         {
@@ -366,7 +354,6 @@
         game.input.onDown.add(onDown, this);
         game.input.onUp.add(onUp, this);
         game.input.addMoveCallback(paint, this);
-
     }
 
     function drawPalette() {
@@ -409,20 +396,6 @@
         color = game.create.palettes[palette][pmap[colorIndex]];
 
         paletteArrow.x = (i * 32) + 8;
-
-    }
-
-    function nextColor() {
-
-        var i = colorIndex + 1;
-        setColor(i);
-
-    }
-
-    function prevColor() {
-
-        var i = colorIndex - 1;
-        setColor(i);
 
     }
 
@@ -497,7 +470,8 @@
                 }
                 var result1 = tilemap.getTile(xx, yy, tilelayer1, true).index;
                 var result2 = tilemap.getTile(xx, yy, tilelayer2, true).index;
-                var dispersalProbability = averagespores / (((sporerange + sporerange + 1) * (sporerange + sporerange + 1)) - 1);
+                var totalsquares = (upperheight - lowerheight) * (upperwidth - lowerwidth) - 1;
+                var dispersalProbability = averagespores / totalsquares;
                 if (result2 !== 48 && result2 !== 40 && result1 !== 34 
                     && Math.random() < dispersalProbability) {
                     tilemap.putTile(48, xx, yy, tilelayer2);
@@ -738,22 +712,11 @@
 
         game.stage.backgroundColor = '#505050';
         
-        
-        /*
-        turnbutton.fixedToCamera = false;
-        turnbutton.x = 50;
-        turnbutton.y = 30;
-        */
         createUI();
-        /* createDrawingArea(); */
-        /* createPreview(); */
         createEventListeners();
         
         resetData();
         setColor(0);
-        
-        /*turnbutton.bringToTop(); */
-
     }
 
     function save() {
@@ -790,60 +753,12 @@
             }
             
             output = output.concat("];\n");
-            output = output.concat("game.create.texture('yourKey', frame" + f + ", " + previewSize + ", " + previewSize + ", " + palette + ");\n");
-
         }
 
         console.log(output);
 
         saveText.alpha = 1;
         game.add.tween(saveText).to( { alpha: 0 }, 2000, "Linear", true);
-
-    }
-
-    function shiftLeft() {
-
-        canvas.moveH(-canvasZoom);
-        preview.moveH(-previewSize);
-
-        for (var y = 0; y < spriteHeight; y++)
-        {
-            var r = data[y].shift();
-            data[y].push(r);
-        }
-
-    }
-
-    function shiftRight() {
-
-        canvas.moveH(canvasZoom);
-        preview.moveH(previewSize);
-
-        for (var y = 0; y < spriteHeight; y++)
-        {
-            var r = data[y].pop();
-            data[y].splice(0, 0, r);
-        }
-
-    }
-
-    function shiftUp() {
-
-        canvas.moveV(-canvasZoom);
-        preview.moveV(-previewSize);
-
-        var top = data.shift();
-        data.push(top);
-
-    }
-
-    function shiftDown() {
-
-        canvas.moveV(canvasZoom);
-        preview.moveV(previewSize);
-
-        var bottom = data.pop();
-        data.splice(0, 0, bottom);
 
     }
 
