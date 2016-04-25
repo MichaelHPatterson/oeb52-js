@@ -73,6 +73,9 @@
 
     var sporerange = 5;
     var averagespores = 3;
+    var epochCounter = 0;
+
+    var runningTheProgram = false;
 
     // Turn Button
     var turnbutton;
@@ -318,6 +321,9 @@
             }
             sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
         });
+
+        // Epoch Counter
+        epochText = game.add.text(rightCol, 300, "# of Turns: " + epochCounter + " turns", style);
 
         //  Save Icon
 
@@ -674,7 +680,7 @@
     }
 
 
-    function buttonPress() {
+    function epoch() {
         /* Gametes arbitrarily get priority over spores. */
         propagateGametes();
         propagateSpores();
@@ -684,10 +690,20 @@
          * already.
          */
          updateData();
+         epochCounter += 1;
+         epochText.text = "# of Turns: " + epochCounter + " turns";
     }
 
+    var runningTheTimer;
     function buttonActualPress() {
-        var myVar = setInterval(buttonPress, 1000);
+        if (runningTheProgram == false) {
+            runningTheProgram = true;
+            runningTheTimer = setInterval(epoch, 1000);
+        }
+        else {
+            runningTheProgram = false;
+            clearInterval(runningTheTimer);
+        }
     }
 
     function preload() {
