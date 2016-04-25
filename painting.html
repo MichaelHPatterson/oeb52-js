@@ -48,7 +48,7 @@
 
     var saveIcon;
     var saveText;
-    var rightCol = 532;
+    var rightCol = 542;
 
     //  Drawing Area
     var canvas;
@@ -63,8 +63,8 @@
     var tilelayer1 = null;
     var tilelayer2 = null;
     var gridsize = 32;
-    var tilewidth = 8;
-    var tileheight = 8;
+    var tilewidth = 16;
+    var tileheight = 16;
 
     // User-writeable constants
     var gdeathprob = 50;
@@ -299,12 +299,12 @@
                 averagespores = (((sporerange + sporerange + 1) * (sporerange + sporerange + 1)) - 1);
             }
             rangeText.text = "Spore Dispersal \nRange: " + sporerange + " blocks";
-            sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
+            sporeSpawningText.text = "Average # of Gametophytes \nper sporophyte: " + averagespores;
         });
 
         //  Change Average # of spores per sporophyte
 
-        sporeSpawningText = game.add.text(rightCol, 300, "Average # of Spores \nper sporophyte: " + averagespores + " spores", style);
+        sporeSpawningText = game.add.text(rightCol, 300, "Average # of Gametophytes \nper sporophyte: " + averagespores, style);
 
         sporeSpawningUp = game.add.sprite(rightCol + 180, 300, 'plus');
         sporeSpawningUp.inputEnabled = true;
@@ -322,7 +322,7 @@
                 }
                 averagespores += 5;
             }
-            sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
+            sporeSpawningText.text = "Average # of Gametophytes \nper sporophyte: " + averagespores;
         });
 
         sporeSpawningDown = game.add.sprite(rightCol + 220, 300, 'minus');
@@ -335,7 +335,7 @@
             else if (averagespores > 0) {
                 averagespores -= 5;
             }
-            sporeSpawningText.text = "Average # of Spores \nper sporophyte: " + averagespores + " spores";
+            sporeSpawningText.text = "Average # of Gametophytes \nper sporophyte: " + averagespores;
         });
 
         // Epoch Counter
@@ -484,7 +484,7 @@
             for (var xx = lowerwidth; xx < upperwidth; xx++)
             {
                 if (xx == x && yy == y) {
-                    if (Math.random() < sdeathprob) {
+                    if ((Math.random() * 100) < sdeathprob) {
                         console.log("RIP SPOROPHYTE");
                         data[yy][xx] = '.';
                         tilemap.putTile(39, x, y, tilelayer2);
@@ -566,9 +566,15 @@
                     }
                     continue;
                 }
-                var result = tilemap.getTile(xx, yy, tilelayer1, true).index;
+                var result1 = tilemap.getTile(xx, yy, tilelayer1, true).index;
+                var result2 = tilemap.getTile(xx, yy, tilelayer2, true).index;
+                /* We've found another gametophyte, so try to fertilize. If 
+                 * successful, replace ourselves with the sporophyte. */
+                if (result2 === 48 && Math.random() * 100 < zygoteprob) {
+                    tilemap.putTile(40, xx, yy, tilelayer2);
+                }
                 /* We've found water that we haven't looked in already */
-                if (result === 34 && (waterTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
+                if (result1 === 34 && (waterTiles.indexOf(encodeTuple(xx,yy)) === -1)) {
                     waterTiles.push(encodeTuple(xx,yy));
                     gameteSonar(xx, yy, radius, careAboutRadius);
                 }
@@ -721,15 +727,15 @@
 
         tilelayer1 = tilemap.createLayer('Tile Layer 1');
         tilelayer1.fixedToCamera = false;
-        tilelayer1.x = 50;
-        tilelayer1.y = 330;
+        tilelayer1.x = 15;
+        tilelayer1.y = 60;
 
-        tilelayer2 = tilemap.createBlankLayer('Tile Layer 2', 8, 8, 32, 32);
+        tilelayer2 = tilemap.createBlankLayer('Tile Layer 2', 16, 16, 32, 32);
         tilelayer2.fixedToCamera = false;
-        tilelayer2.x = 50;
-        tilelayer2.y = 330;
+        tilelayer2.x = 15;
+        tilelayer2.y = 60;
 
-        turnbutton = game.add.button(500, 500, 'button', buttonActualPress, this);
+        turnbutton = game.add.button(550, 520, 'button', buttonActualPress, this);
 
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
