@@ -67,6 +67,10 @@
     var tilewidth = 8;
     var tileheight = 8;
 
+    // User-writeable constants
+    var gdeathprob = 50;
+    var sdeathprob = 50;
+
     // Turn Button
     var turnbutton;
 
@@ -150,8 +154,6 @@
 
     function createUI() {
 
-        game.create.grid('uiGrid', 32 * 16, 32, 32, 32, 'rgba(255,255,255,0.5)');
-
         //  Create some icons
         var arrow = [
             '  22  ',
@@ -205,7 +207,7 @@
 
         ui.addToWorld();
 
-        var style = { font: "20px Courier", fill: "#fff", tabs: 80 };
+        var style = { font: "11px Courier", fill: "#fff", tabs: 80 };
 
         coords = game.add.text(rightCol, 8, "X: 0\tY: 0", style);
 
@@ -216,35 +218,35 @@
 
         //  Change width
 
-        widthText = game.add.text(rightCol, 60, "Width: " + spriteWidth, style);
+        gdeathText = game.add.text(rightCol, 60, "Probability of Gametophyte \nDeath: " + gdeathprob + "%", style);
 
         widthUp = game.add.sprite(rightCol + 180, 60, 'plus');
-        widthUp.name = 'width';
+        widthUp.name = 'gametoProbability';
         widthUp.inputEnabled = true;
         widthUp.input.useHandCursor = true;
-        /* widthUp.events.onInputDown.add(increaseSize, this); */
+        widthUp.events.onInputDown.add(increaseProbability, this);
 
         widthDown = game.add.sprite(rightCol + 220, 60, 'minus');
-        widthDown.name = 'width';
+        widthDown.name = 'gametoProbability';
         widthDown.inputEnabled = true;
         widthDown.input.useHandCursor = true;
-        /* widthDown.events.onInputDown.add(decreaseSize, this); */
+        widthDown.events.onInputDown.add(decreaseProbability, this);
 
         //  Change height
 
-        heightText = game.add.text(rightCol, 100, "Height: " + spriteHeight, style);
+        sdeathText = game.add.text(rightCol, 100, "Probability of Sporophyte \nDeath: " + sdeathprob + "%", style);
 
         heightUp = game.add.sprite(rightCol + 180, 100, 'plus');
-        heightUp.name = 'height';
+        heightUp.name = 'sporoProbability';
         heightUp.inputEnabled = true;
         heightUp.input.useHandCursor = true;
-        /* heightUp.events.onInputDown.add(increaseSize, this); */
+        heightUp.events.onInputDown.add(increaseProbability, this);
 
         heightDown = game.add.sprite(rightCol + 220, 100, 'minus');
-        heightDown.name = 'height';
+        heightDown.name = 'sporoProbability';
         heightDown.inputEnabled = true;
         heightDown.input.useHandCursor = true;
-        /* heightDown.events.onInputDown.add(decreaseSize, this); */
+        heightDown.events.onInputDown.add(decreaseProbability, this);
 
         //  Change frame
 
@@ -286,110 +288,25 @@
 
     }
 
-    function createDrawingArea() {
-
-        game.create.grid('drawingGrid', 16 * canvasZoom, 16 * canvasZoom, canvasZoom, canvasZoom, 'rgba(0,191,243,0.8)');
-
-        canvas = game.make.bitmapData(spriteWidth * canvasZoom, spriteHeight * canvasZoom);
-        canvasBG = game.make.bitmapData(canvas.width + 2, canvas.height + 2);
-
-        canvasBG.rect(0, 0, canvasBG.width, canvasBG.height, '#fff');
-        canvasBG.rect(1, 1, canvasBG.width - 2, canvasBG.height - 2, '#3f5c67');
-
-        var x = 10;
-        var y = 64;
-
-        canvasBG.addToWorld(x, y);
-        canvasSprite = canvas.addToWorld(x + 1, y + 1);
-        canvasGrid = game.add.sprite(x + 1, y + 1, 'drawingGrid');
-        canvasGrid.crop(new Phaser.Rectangle(0, 0, spriteWidth * canvasZoom, spriteHeight * canvasZoom));
-
-    }
-
-    function resizeCanvas() {
-
-        canvas.resize(spriteWidth * canvasZoom, spriteHeight * canvasZoom);
-        canvasBG.resize(canvas.width + 2, canvas.height + 2);
-
-        canvasBG.rect(0, 0, canvasBG.width, canvasBG.height, '#fff');
-        canvasBG.rect(1, 1, canvasBG.width - 2, canvasBG.height - 2, '#3f5c67');
-
-        canvasGrid.crop(new Phaser.Rectangle(0, 0, spriteWidth * canvasZoom, spriteHeight * canvasZoom));
-        
-    }
-
-    function createPreview() {
-
-        preview = game.make.bitmapData(spriteWidth * previewSize, spriteHeight * previewSize);
-        previewBG = game.make.bitmapData(preview.width + 2, preview.height + 2);
-
-        previewBG.rect(0, 0, previewBG.width, previewBG.height, '#fff');
-        previewBG.rect(1, 1, previewBG.width - 2, previewBG.height - 2, '#3f5c67');
-
-        var x = rightCol;
-        var y = 250;
-
-        previewBG.addToWorld(x, y);
-        preview.addToWorld(x + 1, y + 1);
-
-    }
-
-    function resizePreview() {
-
-        preview.resize(spriteWidth * previewSize, spriteHeight * previewSize);
-        previewBG.resize(preview.width + 2, preview.height + 2);
-
-        previewBG.rect(0, 0, previewBG.width, previewBG.height, '#fff');
-        previewBG.rect(1, 1, previewBG.width - 2, previewBG.height - 2, '#3f5c67');
-        
-    }
-
-    function refresh() {
-
-        //  Update both the Canvas and Preview
-        canvas.clear();
-        preview.clear();
-
-        for (var y = 0; y < spriteHeight; y++)
-        {
-            for (var x = 0; x < spriteWidth; x++)
-            {
-                var i = data[y][x];
-
-                if (i !== '.' && i !== ' ')
-                {
-                    color = game.create.palettes[palette][i];
-                    canvas.rect(x * canvasZoom, y * canvasZoom, canvasZoom, canvasZoom, color);
-                    preview.rect(x * previewSize, y * previewSize, previewSize, previewSize, color);
-                }
-            }
-        }
-
-    }
-
     function createEventListeners() {
 
         keys = game.input.keyboard.addKeys(
             {
-                'erase': Phaser.Keyboard.X,
                 'save': Phaser.Keyboard.S,
                 'up': Phaser.Keyboard.UP,
                 'down': Phaser.Keyboard.DOWN,
                 'left': Phaser.Keyboard.LEFT,
                 'right': Phaser.Keyboard.RIGHT,
-                'changePalette': Phaser.Keyboard.P,
                 'color0': Phaser.Keyboard.ZERO,
                 'color1': Phaser.Keyboard.ONE
             }
         );
 
-        keys.erase.onDown.add(cls, this);
         keys.save.onDown.add(save, this);
         keys.up.onDown.add(shiftUp, this);
         keys.down.onDown.add(shiftDown, this);
         keys.left.onDown.add(shiftLeft, this);
         keys.right.onDown.add(shiftRight, this);
-        keys.changePalette.onDown.add(changePalette, this);
 
         for (var i = 0; i < 2; i++)
         {
@@ -400,13 +317,6 @@
         game.input.onDown.add(onDown, this);
         game.input.onUp.add(onUp, this);
         game.input.addMoveCallback(paint, this);
-
-    }
-
-    function cls() {
-
-        resetData();
-        refresh();
 
     }
 
@@ -427,23 +337,6 @@
               break;
             }
         }
-
-        /* ui.copy('uiGrid'); */
-
-    }
-
-    function changePalette() {
-
-        palette++;
-
-        if (!game.create.palettes[palette])
-        {
-            palette = 0;
-        }
-
-        drawPalette();
-        refresh();
-
     }
 
     function setColor(i, p) {
@@ -484,6 +377,43 @@
 
     }
 
+    function increaseProbability(sprite) {
+
+        if (sprite.name === 'gametoProbability') {
+            if (gdeathprob == 100) {
+                return;
+            }
+            gdeathprob += 5;
+        }
+        else if (sprite.name === 'sporoProbability') {
+            if (sdeathprob == 100) {
+                return;
+            }
+            sdeathprob += 5;
+        }
+        gdeathText.text = "Probability of Gametophyte \nDeath: " + gdeathprob + "%";
+        sdeathText.text = "Probability of Sporophyte \nDeath: " + sdeathprob + "%";
+    }
+
+    function decreaseProbability(sprite) {
+
+        if (sprite.name === 'gametoProbability') {
+            if (gdeathprob == 0) {
+                return;
+            }
+            gdeathprob -= 5;
+        }
+        else if (sprite.name === 'sporoProbability') {
+            if (sdeathprob == 0) {
+                return;
+            }
+            sdeathprob -= 5;
+        }
+        gdeathText.text = "Probability of Gametophyte \nDeath: " + gdeathprob + "%";
+        sdeathText.text = "Probability of Sporophyte \nDeath: " + sdeathprob + "%";
+    }
+
+
     function tileLookup(x, y, layer) {
         if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight) {
             return -1;
@@ -502,7 +432,7 @@
             for (var xx = lowerwidth; xx < upperwidth; xx++)
             {
                 if (xx == x && yy == y) {
-                    if (Math.random() < .5) {
+                    if (Math.random() < sdeathprob) {
                         console.log("RIP SPOROPHYTE");
                         data[yy][xx] = '.';
                         tilemap.putTile(39, x, y, tilelayer2);
@@ -575,7 +505,7 @@
             for (var xx = lowerwidth; xx < upperwidth; xx++)
             {
                 if (xx == x && yy == y) {
-                    if (Math.random() < .2) {
+                    if ((Math.random() * 100) < gdeathprob) {
                         console.log("RIP GAMETOPHYTE");
                         data[yy][xx] = '.';
                         tilemap.putTile(47, x, y, tilelayer2);
@@ -748,8 +678,8 @@
         turnbutton.y = 30;
         */
         createUI();
-        createDrawingArea();
-        createPreview();
+        /* createDrawingArea(); */
+        /* createPreview(); */
         createEventListeners();
         
         resetData();
