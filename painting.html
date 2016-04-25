@@ -222,13 +222,13 @@
         widthUp.name = 'width';
         widthUp.inputEnabled = true;
         widthUp.input.useHandCursor = true;
-        widthUp.events.onInputDown.add(increaseSize, this);
+        /* widthUp.events.onInputDown.add(increaseSize, this); */
 
         widthDown = game.add.sprite(rightCol + 220, 60, 'minus');
         widthDown.name = 'width';
         widthDown.inputEnabled = true;
         widthDown.input.useHandCursor = true;
-        widthDown.events.onInputDown.add(decreaseSize, this);
+        /* widthDown.events.onInputDown.add(decreaseSize, this); */
 
         //  Change height
 
@@ -238,13 +238,13 @@
         heightUp.name = 'height';
         heightUp.inputEnabled = true;
         heightUp.input.useHandCursor = true;
-        heightUp.events.onInputDown.add(increaseSize, this);
+        /* heightUp.events.onInputDown.add(increaseSize, this); */
 
         heightDown = game.add.sprite(rightCol + 220, 100, 'minus');
         heightDown.name = 'height';
         heightDown.inputEnabled = true;
         heightDown.input.useHandCursor = true;
-        heightDown.events.onInputDown.add(decreaseSize, this);
+        /* heightDown.events.onInputDown.add(decreaseSize, this); */
 
         //  Change frame
 
@@ -253,12 +253,12 @@
         nextFrameButton = game.add.sprite(rightCol + 180, 160, 'plus');
         nextFrameButton.inputEnabled = true;
         nextFrameButton.input.useHandCursor = true;
-        nextFrameButton.events.onInputDown.add(nextFrame, this);
+        /* nextFrameButton.events.onInputDown.add(nextFrame, this); */
 
         prevFrameButton = game.add.sprite(rightCol + 220, 160, 'minus');
         prevFrameButton.inputEnabled = true;
         prevFrameButton.input.useHandCursor = true;
-        prevFrameButton.events.onInputDown.add(prevFrame, this);
+        /* prevFrameButton.events.onInputDown.add(prevFrame, this); */
 
         //  Change preview
 
@@ -267,12 +267,12 @@
         previewSizeUp = game.add.sprite(rightCol + 180, 220, 'plus');
         previewSizeUp.inputEnabled = true;
         previewSizeUp.input.useHandCursor = true;
-        previewSizeUp.events.onInputDown.add(increasePreviewSize, this);
+        /* previewSizeUp.events.onInputDown.add(increasePreviewSize, this); */
 
         previewSizeDown = game.add.sprite(rightCol + 220, 220, 'minus');
         previewSizeDown.inputEnabled = true;
         previewSizeDown.input.useHandCursor = true;
-        previewSizeDown.events.onInputDown.add(decreasePreviewSize, this);
+        /* previewSizeDown.events.onInputDown.add(decreasePreviewSize, this); */
 
         //  Save Icon
 
@@ -378,8 +378,6 @@
                 'left': Phaser.Keyboard.LEFT,
                 'right': Phaser.Keyboard.RIGHT,
                 'changePalette': Phaser.Keyboard.P,
-                'nextFrame': Phaser.Keyboard.PERIOD,
-                'prevFrame': Phaser.Keyboard.COMMA,
                 'color0': Phaser.Keyboard.ZERO,
                 'color1': Phaser.Keyboard.ONE
             }
@@ -392,8 +390,6 @@
         keys.left.onDown.add(shiftLeft, this);
         keys.right.onDown.add(shiftRight, this);
         keys.changePalette.onDown.add(changePalette, this);
-        keys.nextFrame.onDown.add(nextFrame, this);
-        keys.prevFrame.onDown.add(prevFrame, this);
 
         for (var i = 0; i < 2; i++)
         {
@@ -412,50 +408,6 @@
         resetData();
         refresh();
 
-    }
-
-    function nextFrame() {
-
-        //  Save current frame
-        frames[frame - 1] = cloneData();
-
-        frame++;
-
-        if (frames[frame - 1])
-        {
-            copyToData(frames[frame - 1]);
-        }
-        else
-        {
-            frames.push(null);
-            resetData();
-        }
-
-        refresh();
-
-        frameText.text = "Frame: " + frame + " / " + frames.length;
-
-    }
-
-    function prevFrame() {
-
-        if (frame === 1)
-        {
-            return;
-        }
-
-        //  Save current frame
-        frames[frame - 1] = cloneData();
-
-        frame--;
-
-        //  Load old frame
-        copyToData(frames[frame - 1]);
-
-        refresh();
-
-        frameText.text = "Frame: " + frame + " / " + frames.length;
-        
     }
 
     function drawPalette() {
@@ -532,96 +484,6 @@
 
     }
 
-    function increaseSize(sprite) {
-
-        if (sprite.name === 'width')
-        {
-            if (spriteWidth === 16)
-            {
-                return;
-            }
-
-            spriteWidth++;
-        }
-        else if (sprite.name === 'height')
-        {
-            if (spriteHeight === 16)
-            {
-                return;
-            }
-
-            spriteHeight++;
-        }
-
-        resetData();
-        resizeCanvas();
-        resizePreview();
-
-        widthText.text = "Width: " + spriteWidth;
-        heightText.text = "Height: " + spriteHeight;
-
-    }
-
-    function decreaseSize(sprite) {
-
-        if (sprite.name === 'width')
-        {
-            if (spriteWidth === 4)
-            {
-                return;
-            }
-
-            spriteWidth--;
-        }
-        else if (sprite.name === 'height')
-        {
-            if (spriteHeight === 4)
-            {
-                return;
-            }
-
-            spriteHeight--;
-        }
-
-        resetData();
-        resizeCanvas();
-        resizePreview();
-
-        widthText.text = "Width: " + spriteWidth;
-        heightText.text = "Height: " + spriteHeight;
-
-    }
-
-    function increasePreviewSize() {
-
-        if (previewSize === 16)
-        {
-            return;
-        }
-
-        previewSize++;
-        previewSizeText.text = "Size: " + previewSize;
-
-        resizePreview();
-        refresh();
-
-    }
-
-    function decreasePreviewSize() {
-
-        if (previewSize === 1)
-        {
-            return;
-        }
-
-        previewSize--;
-        previewSizeText.text = "Size: " + previewSize;
-
-        resizePreview();
-        refresh();
-
-    }
-
     function tileLookup(x, y, layer) {
         if (x < 0 || x >= tilewidth|| y < 0 || y >= tileheight) {
             return -1;
@@ -641,6 +503,7 @@
             {
                 if (xx == x && yy == y) {
                     if (Math.random() < .5) {
+                        console.log("RIP SPOROPHYTE");
                         data[yy][xx] = '.';
                         tilemap.putTile(39, x, y, tilelayer2);
                     }
