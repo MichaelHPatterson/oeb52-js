@@ -641,12 +641,15 @@
             {
                 if (xx == x && yy == y) {
                     if (Math.random() < .5) {
+                        data[yy][xx] = '.';
                         tilemap.putTile(39, x, y, tilelayer2);
                     }
                     continue;
                 }
-                var result = tilemap.getTile(xx, yy, tilelayer2, true).index;
-                if (result !== 48 && result !== 40 && Math.random() < .05) {
+                var result1 = tilemap.getTile(xx, yy, tilelayer1, true).index;
+                var result2 = tilemap.getTile(xx, yy, tilelayer2, true).index;
+                if (result2 !== 48 && result2 !== 40 && result1 !== 34 
+                    && Math.random() < .015) {
                     tilemap.putTile(48, xx, yy, tilelayer2);
                 }
             }
@@ -662,7 +665,7 @@
             {
                 var v = data[y][x];
                 if (v == 'S') {
-                    propagateSpore(x, y, 6);
+                    propagateSpore(x, y, 3);
                 }
             }
         }
@@ -709,7 +712,9 @@
             for (var xx = lowerwidth; xx < upperwidth; xx++)
             {
                 if (xx == x && yy == y) {
-                    if (Math.random() < .5) {
+                    if (Math.random() < .2) {
+                        console.log("RIP GAMETOPHYTE");
+                        data[yy][xx] = '.';
                         tilemap.putTile(47, x, y, tilelayer2);
                     }
                     continue;
@@ -837,6 +842,10 @@
          updateData();
     }
 
+    function buttonActualPress() {
+        var myVar = setInterval(buttonPress, 1000);
+    }
+
     function preload() {
         game.load.spritesheet('button', 'assets/button-round.png', 64, 64);
         game.load.tilemap('map', 'assets/desert.json', null, Phaser.Tilemap.TILED_JSON);
@@ -862,7 +871,7 @@
         tilelayer2.x = 50;
         tilelayer2.y = 330;
 
-        turnbutton = game.add.button(500, 500, 'button', buttonPress, this);
+        turnbutton = game.add.button(500, 500, 'button', buttonActualPress, this);
 
         Phaser.Canvas.setUserSelect(game.canvas, 'none');
         Phaser.Canvas.setTouchAction(game.canvas, 'none');
@@ -1026,12 +1035,12 @@
         if (isErase)
         {
             tilemap.removeTile(x, y, tilelayer2);
+            data[y][x] = '.';
             isDown = false;
             return;
         }
 
-        else
-        {
+        else if (tilemap.getTile(x, y, tilelayer1, true).index !== 34) {
             if (colorIndex == 0) {
                 data[y][x] = 'G';
                 tilemap.putTile(48, x, y, tilelayer2);
